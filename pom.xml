@@ -63,7 +63,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hrishikeshmishra.storm.gitcommit.LocalTopologyRunner</mainClass>
+                            <mainClass>com.hrishikeshmishra.storm.barcheckin.LocalTopologyRunner</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

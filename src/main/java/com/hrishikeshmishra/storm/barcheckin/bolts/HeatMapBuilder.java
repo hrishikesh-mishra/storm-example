@@ -10,14 +10,19 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class HeatMapBuilder extends BaseBasicBolt {
+
+    private Logger logger = LoggerFactory.getLogger(HeatMapBuilder.class);
 
     private Map<Long, List<LatLng>> heatMaps;
 
@@ -29,7 +34,7 @@ public class HeatMapBuilder extends BaseBasicBolt {
     @Override
     public Map<String, Object> getComponentConfiguration() {
         Config config = new Config();
-        config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 60);
+        config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 30);
         return config;
     }
 
@@ -38,11 +43,13 @@ public class HeatMapBuilder extends BaseBasicBolt {
         if (isTickTuple(tuple)) {
             emitHeatmap(basicOutputCollector);
         } else {
-            Long time = tuple.getLongByField("time");
+            Long timeInterval = tuple.getLongByField("time-interval");
             LatLng geocode = (LatLng) tuple.getValueByField("geocode");
-            Long timeInterval = selectTimeInterval(time);
+
             List<LatLng> checkins = getCheckinsForInterval(timeInterval);
             checkins.add(geocode);
+
+            logger.info("Got in Heat Map : ");
         }
 
     }
@@ -86,6 +93,6 @@ public class HeatMapBuilder extends BaseBasicBolt {
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-
+        outputFieldsDeclarer.declare(new Fields("time-interval", "hotzones"));
     }
 }
